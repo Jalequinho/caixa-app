@@ -455,7 +455,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('entryDate').value = today;
-            
+
             // Auto-load draft from localStorage if present
             loadDraft();
             calculateAll();
@@ -715,7 +715,7 @@
             const computador = getFieldValue('inputComputador');
 
             const totalEspecie = totalDinheiro + totalGaveta + totalPix;
-            
+
             // AJUSTE SOLICITADO: Tudo soma (incluindo despesas no total líquido final)
             const totalLiquido = totalCartoes + totalEspecie + totalDespesas;
 
@@ -835,7 +835,7 @@
 
                 const totalCartoes = totalCielo + totalRede;
                 const totalEspecie = totalDinheiro + totalGaveta + totalPix;
-                
+
                 // Soma total incluindo Despesas
                 const totalLiquido = totalCartoes + totalEspecie + totalDespesas;
                 const diff = totalLiquido - (item.computador || 0);
@@ -984,20 +984,31 @@
             window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
         }
 
-        // Navigation Toggle
+        // Navigation Toggle (Corrigido)
         function toggleView(target) {
             const calcView = document.getElementById('calculatorView');
             const histView = document.getElementById('historyView');
             const btnText = document.getElementById('tabBtnText');
 
-            if (target === 'calc' || !calcView.classList.contains('hidden')) {
+            if (target === 'calc') {
+                calcView.classList.remove('hidden');
+                histView.classList.add('hidden');
+                btnText.innerText = "Histórico";
+            } else if (target === 'hist') {
                 calcView.classList.add('hidden');
                 histView.classList.remove('hidden');
                 btnText.innerText = "Calculadora";
             } else {
-                histView.classList.remove('hidden');
-                calcView.classList.add('hidden');
-                btnText.innerText = "Histórico";
+                // Alternar automaticamente se nenhum target for passado
+                if (calcView.classList.contains('hidden')) {
+                    calcView.classList.remove('hidden');
+                    histView.classList.add('hidden');
+                    btnText.innerText = "Histórico";
+                } else {
+                    calcView.classList.add('hidden');
+                    histView.classList.remove('hidden');
+                    btnText.innerText = "Calculadora";
+                }
             }
         }
 
@@ -1024,5 +1035,4 @@
       }
     </script>
 </body>
-</html>
 </html>
