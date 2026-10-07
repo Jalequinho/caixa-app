@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -33,7 +33,6 @@
             background: #cbd5e1;
             border-radius: 9999px;
         }
-        /* Modal animation styling */
         @keyframes modalFadeIn {
             from { opacity: 0; transform: translateY(12px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -69,14 +68,14 @@
 
         <!-- CALCULATOR VIEW -->
         <div id="calculatorView" class="space-y-4">
-            
+
             <!-- Date & Quick Actions -->
             <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                     <i class="fa-regular fa-calendar-check text-indigo-600 text-lg"></i>
                     <div>
                         <label for="entryDate" class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Data do Caixa</label>
-                        <input type="date" id="entryDate" class="font-semibold text-slate-700 bg-transparent text-sm focus:outline-none">
+                        <input type="date" id="entryDate" class="font-semibold text-slate-700 bg-transparent text-sm focus:outline-none" onchange="saveDraft()">
                     </div>
                 </div>
                 <button onclick="clearFormWithConfirm()" class="text-xs text-rose-600 font-semibold bg-rose-50 hover:bg-rose-100 active-scale px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
@@ -85,18 +84,18 @@
                 </button>
             </div>
 
-            <!-- SECTION 1: CARTÕES (LANÇAMENTO MULTI-ITEM NOTA POR NOTA) -->
+            <!-- SECTION 1: CARTÕES -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-4">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                     <span class="flex items-center gap-1.5">
                         <i class="fa-solid fa-credit-card text-indigo-500"></i>
-                        Lançamento por Notas de Cartão
+                        Lançamento de Cartões
                     </span>
                     <span class="text-[10px] text-indigo-600 font-medium lowercase">digite + enter</span>
                 </h2>
 
-                <!-- CARTÃO CIELO MULTI-INPUT -->
-                <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+                <!-- CARTÃO CIELO MULTI-INPUT (AZUL) -->
+                <div class="bg-indigo-50/50 p-3 rounded-xl border border-indigo-200/80 space-y-2.5">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-indigo-900 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
@@ -116,24 +115,23 @@
                         </button>
                     </div>
 
-                    <!-- Compact Summary Header & Modal Trigger -->
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-200/80">
+                    <div class="flex justify-between items-center pt-2 border-t border-indigo-200/80">
                         <div>
                             <span class="text-[11px] text-slate-500 font-medium block">Subtotal Cielo:</span>
                             <span id="cieloSubtotalDisp" class="text-indigo-700 font-extrabold text-sm">R$ 0,00</span>
                         </div>
-                        <button onclick="openItemsModal('cielo')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-indigo-200/60">
+                        <button onclick="openItemsModal('cielo')" class="bg-white hover:bg-indigo-100 text-indigo-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-indigo-200">
                             <i class="fa-solid fa-list-check"></i>
                             <span>Ver Notas (<span id="cieloBtnCount">0</span>)</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- CARTÃO REDE MULTI-INPUT -->
-                <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+                <!-- CARTÃO REDE MULTI-INPUT (LARANJA) -->
+                <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-200/80 space-y-2.5">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-rose-900 flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                        <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
                             Cartão Rede
                         </span>
                         <span id="redeCount" class="text-[11px] font-semibold text-slate-500">0 lançamentos</span>
@@ -142,21 +140,20 @@
                     <div class="flex items-center gap-2">
                         <div class="relative flex-1">
                             <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">R$</span>
-                            <input type="text" id="inputRedeItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'rede')" oninput="formatCurrencyInput(this)">
+                            <input type="text" id="inputRedeItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'rede')" oninput="formatCurrencyInput(this)">
                         </div>
-                        <button onclick="addListValue('rede')" class="bg-rose-600 hover:bg-rose-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                        <button onclick="addListValue('rede')" class="bg-orange-600 hover:bg-orange-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
                             <i class="fa-solid fa-plus"></i>
                             <span class="hidden sm:inline">Adicionar</span>
                         </button>
                     </div>
 
-                    <!-- Compact Summary Header & Modal Trigger -->
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-200/80">
+                    <div class="flex justify-between items-center pt-2 border-t border-orange-200/80">
                         <div>
                             <span class="text-[11px] text-slate-500 font-medium block">Subtotal Rede:</span>
-                            <span id="redeSubtotalDisp" class="text-rose-700 font-extrabold text-sm">R$ 0,00</span>
+                            <span id="redeSubtotalDisp" class="text-orange-700 font-extrabold text-sm">R$ 0,00</span>
                         </div>
-                        <button onclick="openItemsModal('rede')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-rose-200/60">
+                        <button onclick="openItemsModal('rede')" class="bg-white hover:bg-orange-100 text-orange-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-orange-200">
                             <i class="fa-solid fa-list-check"></i>
                             <span>Ver Notas (<span id="redeBtnCount">0</span>)</span>
                         </button>
@@ -164,51 +161,114 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: DINHEIRO, PIX, GAVETA E DESPESAS (MULTI-ITEM) -->
+            <!-- SECTION 2: DINHEIRO, GAVETA, PIX E DESPESAS (TODOS LANÇAMENTO MULTI-ITEM) -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3.5">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
                     <i class="fa-solid fa-money-bill-wave text-emerald-500"></i>
                     Espécie, Pix e Despesas
                 </h2>
 
-                <!-- Dinheiro -->
-                <div class="relative">
-                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Dinheiro em Espécie</label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
-                        <input type="text" id="inputDinheiro" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-base focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
-                        <button onclick="clearSingleField('inputDinheiro')" class="absolute right-2.5 text-slate-300 hover:text-slate-500 p-1">
-                            <i class="fa-solid fa-circle-xmark"></i>
+                <!-- DINHEIRO EM ESPÉCIE MULTI-INPUT -->
+                <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-900 flex items-center gap-1">
+                            <i class="fa-solid fa-money-bill text-emerald-600"></i>
+                            Dinheiro em Espécie
+                        </span>
+                        <span id="dinheiroCount" class="text-[11px] font-semibold text-slate-500">0 lançamentos</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">R$</span>
+                            <input type="text" id="inputDinheiroItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'dinheiro')" oninput="formatCurrencyInput(this)">
+                        </div>
+                        <button onclick="addListValue('dinheiro')" class="bg-emerald-600 hover:bg-emerald-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="hidden sm:inline">Adicionar</span>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-emerald-200/80">
+                        <div>
+                            <span class="text-[11px] text-slate-500 font-medium block">Total Dinheiro:</span>
+                            <span id="dinheiroSubtotalDisp" class="text-emerald-700 font-extrabold text-sm">R$ 0,00</span>
+                        </div>
+                        <button onclick="openItemsModal('dinheiro')" class="bg-white hover:bg-emerald-100 text-emerald-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-emerald-200">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Ver Itens (<span id="dinheiroBtnCount">0</span>)</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Gaveta -->
-                <div class="relative">
-                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Gaveta (Fundo / Troco)</label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
-                        <input type="text" id="inputGaveta" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-base focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
-                        <button onclick="clearSingleField('inputGaveta')" class="absolute right-2.5 text-slate-300 hover:text-slate-500 p-1">
-                            <i class="fa-solid fa-circle-xmark"></i>
+                <!-- GAVETA MULTI-INPUT -->
+                <div class="bg-slate-100/70 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-800 flex items-center gap-1">
+                            <i class="fa-solid fa-vault text-slate-600"></i>
+                            Gaveta (Fundo / Troco)
+                        </span>
+                        <span id="gavetaCount" class="text-[11px] font-semibold text-slate-500">0 lançamentos</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">R$</span>
+                            <input type="text" id="inputGavetaItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-slate-500 focus:ring-2 focus:ring-slate-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'gaveta')" oninput="formatCurrencyInput(this)">
+                        </div>
+                        <button onclick="addListValue('gaveta')" class="bg-slate-700 hover:bg-slate-800 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="hidden sm:inline">Adicionar</span>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200/80">
+                        <div>
+                            <span class="text-[11px] text-slate-500 font-medium block">Total Gaveta:</span>
+                            <span id="gavetaSubtotalDisp" class="text-slate-800 font-extrabold text-sm">R$ 0,00</span>
+                        </div>
+                        <button onclick="openItemsModal('gaveta')" class="bg-white hover:bg-slate-200 text-slate-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-slate-300">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Ver Itens (<span id="gavetaBtnCount">0</span>)</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- CPF - Pix -->
-                <div class="relative">
-                    <label class="text-xs font-semibold text-slate-600 mb-1 block">CPF - Pix</label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
-                        <input type="text" id="inputPix" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-base focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
-                        <button onclick="clearSingleField('inputPix')" class="absolute right-2.5 text-slate-300 hover:text-slate-500 p-1">
-                            <i class="fa-solid fa-circle-xmark"></i>
+                <!-- PIX MULTI-INPUT -->
+                <div class="bg-teal-50/50 p-3 rounded-xl border border-teal-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-teal-900 flex items-center gap-1">
+                            <i class="fa-solid fa-qrcode text-teal-600"></i>
+                            CPF - Pix
+                        </span>
+                        <span id="pixCount" class="text-[11px] font-semibold text-slate-500">0 lançamentos</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">R$</span>
+                            <input type="text" id="inputPixItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'pix')" oninput="formatCurrencyInput(this)">
+                        </div>
+                        <button onclick="addListValue('pix')" class="bg-teal-600 hover:bg-teal-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="hidden sm:inline">Adicionar</span>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-teal-200/80">
+                        <div>
+                            <span class="text-[11px] text-slate-500 font-medium block">Total Pix:</span>
+                            <span id="pixSubtotalDisp" class="text-teal-700 font-extrabold text-sm">R$ 0,00</span>
+                        </div>
+                        <button onclick="openItemsModal('pix')" class="bg-white hover:bg-teal-100 text-teal-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-teal-200">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Ver Itens (<span id="pixBtnCount">0</span>)</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Despesas Multi-Lançamento -->
-                <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-200/80 space-y-2.5 pt-2">
+                <!-- DESPESAS MULTI-INPUT -->
+                <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-200/80 space-y-2.5">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-rose-900 flex items-center gap-1">
                             <i class="fa-solid fa-receipt text-rose-500"></i>
@@ -228,7 +288,6 @@
                         </button>
                     </div>
 
-                    <!-- Compact Summary Header & Modal Trigger -->
                     <div class="flex justify-between items-center pt-2 border-t border-rose-200/80">
                         <div>
                             <span class="text-[11px] text-rose-700 font-medium block">Total Despesas:</span>
@@ -252,7 +311,7 @@
                 </div>
                 <div class="relative flex items-center">
                     <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
-                    <input type="text" id="inputComputador" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-3 bg-white/10 border border-white/20 rounded-xl font-extrabold text-white text-lg placeholder-slate-400 focus:bg-white/20 focus:border-indigo-400 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
+                    <input type="text" id="inputComputador" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-3 bg-white/10 border border-white/20 rounded-xl font-extrabold text-white text-lg placeholder-slate-400 focus:bg-white/20 focus:border-indigo-400 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll(); saveDraft();">
                     <button onclick="clearSingleField('inputComputador')" class="absolute right-2.5 text-slate-400 hover:text-white p-1">
                         <i class="fa-solid fa-circle-xmark"></i>
                     </button>
@@ -271,9 +330,9 @@
                         <p class="text-indigo-900/60 font-medium">Total Cielo</p>
                         <p id="dispCieloTotal" class="font-bold text-indigo-700 text-sm mt-0.5">R$ 0,00</p>
                     </div>
-                    <div class="bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
-                        <p class="text-rose-900/60 font-medium">Total Rede</p>
-                        <p id="dispRedeTotal" class="font-bold text-rose-700 text-sm mt-0.5">R$ 0,00</p>
+                    <div class="bg-orange-50/50 p-2.5 rounded-xl border border-orange-100">
+                        <p class="text-amber-900/60 font-medium">Total Rede</p>
+                        <p id="dispRedeTotal" class="font-bold text-orange-700 text-sm mt-0.5">R$ 0,00</p>
                     </div>
                 </div>
 
@@ -288,11 +347,7 @@
                     </div>
                     <div class="flex justify-between items-center py-1 border-b border-slate-50">
                         <span class="text-slate-500 font-medium text-rose-600">Total Despesas:</span>
-                        <span id="dispTotalDespesas" class="font-bold text-rose-600">- R$ 0,00</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1 border-b border-slate-50">
-                        <span class="text-slate-500 font-medium">Total Geral Bruto:</span>
-                        <span id="dispTotalBruto" class="font-bold text-slate-800">R$ 0,00</span>
+                        <span id="dispTotalDespesas" class="font-bold text-rose-600">+ R$ 0,00</span>
                     </div>
                     <div class="flex justify-between items-center py-1.5 text-base font-bold bg-indigo-50/70 px-3 rounded-xl text-indigo-950">
                         <span>Total Líquido Final:</span>
@@ -338,16 +393,15 @@
             </div>
 
             <div id="historyList" class="space-y-3">
-                <!-- Dynamically populated -->
+                <!-- Populates dynamically -->
             </div>
         </div>
 
     </main>
 
-    <!-- MODAL DE LISTA DE NOTAS/LANÇAMENTOS (ILIMITADOS) -->
+    <!-- MODAL DE LISTA DE NOTAS/LANÇAMENTOS -->
     <div id="itemsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-modal">
-            <!-- Modal Header -->
             <div id="modalHeaderBg" class="bg-indigo-600 text-white px-5 py-4 flex items-center justify-between shadow-md">
                 <div class="flex items-center gap-2.5">
                     <div class="bg-white/20 p-2 rounded-xl">
@@ -363,12 +417,10 @@
                 </button>
             </div>
 
-            <!-- Modal Content (Scrollable List) -->
             <div class="p-4 overflow-y-auto flex-1 space-y-2" id="modalItemsContainer">
-                <!-- Items list rendered dynamically -->
+                <!-- Rendered dynamically -->
             </div>
 
-            <!-- Modal Footer -->
             <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-400 font-medium block">Soma dos Lançamentos</span>
@@ -388,10 +440,13 @@
     </div>
 
     <script>
-        // Store for unlimited items
+        // Store for all list-based fields
         let listData = {
             cielo: [],
             rede: [],
+            dinheiro: [],
+            gaveta: [],
+            pix: [],
             despesas: []
         };
 
@@ -400,11 +455,55 @@
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('entryDate').value = today;
+            
+            // Auto-load draft from localStorage if present
+            loadDraft();
             calculateAll();
             renderHistory();
         });
 
-        // Parse String formatted R$ into Float
+        // Save current form inputs automatically into localStorage draft
+        function saveDraft() {
+            const draft = {
+                date: document.getElementById('entryDate').value,
+                listData: listData,
+                computador: document.getElementById('inputComputador').value
+            };
+            localStorage.setItem('caixa_draft_v1', JSON.stringify(draft));
+        }
+
+        function loadDraft() {
+            try {
+                const saved = localStorage.getItem('caixa_draft_v1');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.date) document.getElementById('entryDate').value = parsed.date;
+                    if (parsed.listData) {
+                        listData = {
+                            cielo: parsed.listData.cielo || [],
+                            rede: parsed.listData.rede || [],
+                            dinheiro: parsed.listData.dinheiro || [],
+                            gaveta: parsed.listData.gaveta || [],
+                            pix: parsed.listData.pix || [],
+                            despesas: parsed.listData.despesas || []
+                        };
+                    }
+                    if (parsed.computador !== undefined) {
+                        document.getElementById('inputComputador').value = parsed.computador;
+                    }
+                    updateAllCompactDisplays();
+                }
+            } catch (e) {
+                console.error("Erro ao carregar rascunho", e);
+            }
+        }
+
+        function updateAllCompactDisplays() {
+            ['cielo', 'rede', 'dinheiro', 'gaveta', 'pix', 'despesas'].forEach(type => {
+                updateCompactDisplays(type);
+            });
+        }
+
         function parseCurrency(valueString) {
             if (!valueString) return 0;
             const digits = valueString.replace(/\D/g, '');
@@ -412,7 +511,6 @@
             return parseFloat(digits) / 100;
         }
 
-        // Format Float into R$ String
         function formatCurrency(number) {
             return number.toLocaleString('pt-BR', {
                 style: 'currency',
@@ -420,7 +518,6 @@
             });
         }
 
-        // Format live typing in input field
         function formatCurrencyInput(input) {
             let digits = input.value.replace(/\D/g, '');
             if (digits === '') {
@@ -434,7 +531,6 @@
             }
         }
 
-        // Handle Enter key on inputs
         function handleCardKeydown(event, type) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -442,13 +538,11 @@
             }
         }
 
-        // Add item to Cielo, Rede or Despesas unlimited array
         function addListValue(type) {
-            let inputId = 'inputCieloItem';
-            if (type === 'rede') inputId = 'inputRedeItem';
-            if (type === 'despesas') inputId = 'inputDespesasItem';
-
+            let inputId = 'input' + type.charAt(0).toUpperCase() + type.slice(1) + 'Item';
             const input = document.getElementById(inputId);
+            if (!input) return;
+
             const value = parseCurrency(input.value);
 
             if (value <= 0) {
@@ -462,51 +556,42 @@
                 time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             });
 
-            input.value = ''; // Clear for next input
-            input.focus(); // Keep focus for quick consecutive entry
+            input.value = '';
+            input.focus();
 
             updateCompactDisplays(type);
             calculateAll();
+            saveDraft();
 
-            // If modal is currently open for this type, refresh its content
             if (currentActiveModalType === type) {
                 renderModalItems();
             }
         }
 
-        // Remove single item by ID
         function removeListItem(type, itemId) {
             listData[type] = listData[type].filter(item => item.id !== itemId);
             updateCompactDisplays(type);
             calculateAll();
+            saveDraft();
             if (currentActiveModalType === type) {
                 renderModalItems();
             }
         }
 
-        // Update display counters and subtotals on main page
         function updateCompactDisplays(type) {
-            const items = listData[type];
+            const items = listData[type] || [];
             const sum = items.reduce((acc, item) => acc + item.value, 0);
-
             const countText = `${items.length} ${items.length === 1 ? 'lançamento' : 'lançamentos'}`;
-            
-            if (type === 'cielo') {
-                document.getElementById('cieloCount').innerText = countText;
-                document.getElementById('cieloSubtotalDisp').innerText = formatCurrency(sum);
-                document.getElementById('cieloBtnCount').innerText = items.length;
-            } else if (type === 'rede') {
-                document.getElementById('redeCount').innerText = countText;
-                document.getElementById('redeSubtotalDisp').innerText = formatCurrency(sum);
-                document.getElementById('redeBtnCount').innerText = items.length;
-            } else if (type === 'despesas') {
-                document.getElementById('despesasCount').innerText = countText;
-                document.getElementById('despesasSubtotalDisp').innerText = formatCurrency(sum);
-                document.getElementById('despesasBtnCount').innerText = items.length;
-            }
+
+            const countEl = document.getElementById(`${type}Count`);
+            const subtotalEl = document.getElementById(`${type}SubtotalDisp`);
+            const btnCountEl = document.getElementById(`${type}BtnCount`);
+
+            if (countEl) countEl.innerText = countText;
+            if (subtotalEl) subtotalEl.innerText = formatCurrency(sum);
+            if (btnCountEl) btnCountEl.innerText = items.length;
         }
 
-        // Open Modal Pop-up for viewing all items
         function openItemsModal(type) {
             currentActiveModalType = type;
             const modal = document.getElementById('itemsModal');
@@ -514,19 +599,19 @@
             const title = document.getElementById('modalTitle');
             const icon = document.getElementById('modalHeaderIcon');
 
-            if (type === 'cielo') {
-                headerBg.className = "bg-indigo-600 text-white px-5 py-4 flex items-center justify-between shadow-md";
-                title.innerText = "Lançamentos Cielo";
-                icon.className = "fa-solid fa-credit-card text-white";
-            } else if (type === 'rede') {
-                headerBg.className = "bg-rose-600 text-white px-5 py-4 flex items-center justify-between shadow-md";
-                title.innerText = "Lançamentos Rede";
-                icon.className = "fa-solid fa-credit-card text-white";
-            } else {
-                headerBg.className = "bg-rose-700 text-white px-5 py-4 flex items-center justify-between shadow-md";
-                title.innerText = "Lançamentos de Despesas";
-                icon.className = "fa-solid fa-receipt text-white";
-            }
+            const modalConfigs = {
+                cielo: { bg: "bg-indigo-600", title: "Lançamentos Cielo", icon: "fa-credit-card" },
+                rede: { bg: "bg-orange-600", title: "Lançamentos Rede", icon: "fa-credit-card" },
+                dinheiro: { bg: "bg-emerald-600", title: "Lançamentos Dinheiro", icon: "fa-money-bill" },
+                gaveta: { bg: "bg-slate-700", title: "Lançamentos Gaveta", icon: "fa-vault" },
+                pix: { bg: "bg-teal-600", title: "Lançamentos Pix", icon: "fa-qrcode" },
+                despesas: { bg: "bg-rose-600", title: "Lançamentos Despesas", icon: "fa-receipt" }
+            };
+
+            const config = modalConfigs[type] || modalConfigs.cielo;
+            headerBg.className = `${config.bg} text-white px-5 py-4 flex items-center justify-between shadow-md`;
+            title.innerText = config.title;
+            icon.className = `fa-solid ${config.icon} text-white`;
 
             renderModalItems();
             modal.classList.remove('hidden');
@@ -540,7 +625,7 @@
         function renderModalItems() {
             if (!currentActiveModalType) return;
             const type = currentActiveModalType;
-            const items = listData[type];
+            const items = listData[type] || [];
             const container = document.getElementById('modalItemsContainer');
             const subtitle = document.getElementById('modalSubtitle');
             const totalSum = document.getElementById('modalTotalSum');
@@ -559,7 +644,6 @@
                 return;
             }
 
-            // Reverse items so newest is on top
             const reversedItems = [...items].reverse();
 
             container.innerHTML = reversedItems.map((item, idx) => {
@@ -591,25 +675,20 @@
             if (el) {
                 el.value = '';
                 calculateAll();
+                saveDraft();
             }
         }
 
         function clearFormWithConfirm() {
             if (confirm("Deseja mesmo limpar todos os lançamentos do dia?")) {
-                listData.cielo = [];
-                listData.rede = [];
-                listData.despesas = [];
-
-                updateCompactDisplays('cielo');
-                updateCompactDisplays('rede');
-                updateCompactDisplays('despesas');
+                listData = { cielo: [], rede: [], dinheiro: [], gaveta: [], pix: [], despesas: [] };
+                updateAllCompactDisplays();
 
                 document.querySelectorAll('.currency-input').forEach(i => i.value = '');
-                document.getElementById('inputCieloItem').value = '';
-                document.getElementById('inputRedeItem').value = '';
-                document.getElementById('inputDespesasItem').value = '';
+                document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
 
                 calculateAll();
+                localStorage.removeItem('caixa_draft_v1');
                 showToast("Formulário zerado!", "fa-circle-check", "text-emerald-400");
             }
         }
@@ -618,30 +697,34 @@
             return parseCurrency(document.getElementById(id)?.value || '');
         }
 
-        // Calculation Logic
+        function getListSum(type) {
+            return (listData[type] || []).reduce((acc, item) => acc + item.value, 0);
+        }
+
+        // CALCULATION LOGIC (Ajustado: Despesa agora SOMANDO ao total)
         function calculateAll() {
-            const totalCielo = listData.cielo.reduce((acc, item) => acc + item.value, 0);
-            const totalRede = listData.rede.reduce((acc, item) => acc + item.value, 0);
+            const totalCielo = getListSum('cielo');
+            const totalRede = getListSum('rede');
             const totalCartoes = totalCielo + totalRede;
 
-            const dinheiro = getFieldValue('inputDinheiro');
-            const gaveta = getFieldValue('inputGaveta');
-            const pix = getFieldValue('inputPix');
-            
-            const totalDespesas = listData.despesas.reduce((acc, item) => acc + item.value, 0);
+            const totalDinheiro = getListSum('dinheiro');
+            const totalGaveta = getListSum('gaveta');
+            const totalPix = getListSum('pix');
+
+            const totalDespesas = getListSum('despesas');
             const computador = getFieldValue('inputComputador');
 
-            const totalEspecie = dinheiro + gaveta + pix;
-            const totalBruto = totalCartoes + totalEspecie;
-            const totalLiquido = totalBruto - totalDespesas;
+            const totalEspecie = totalDinheiro + totalGaveta + totalPix;
+            
+            // AJUSTE SOLICITADO: Tudo soma (incluindo despesas no total líquido final)
+            const totalLiquido = totalCartoes + totalEspecie + totalDespesas;
 
             // Updates Summary Display
             document.getElementById('dispCieloTotal').innerText = formatCurrency(totalCielo);
             document.getElementById('dispRedeTotal').innerText = formatCurrency(totalRede);
             document.getElementById('dispTotalCartoes').innerText = formatCurrency(totalCartoes);
             document.getElementById('dispTotalEspecie').innerText = formatCurrency(totalEspecie);
-            document.getElementById('dispTotalDespesas').innerText = `- ${formatCurrency(totalDespesas)}`;
-            document.getElementById('dispTotalBruto').innerText = formatCurrency(totalBruto);
+            document.getElementById('dispTotalDespesas').innerText = `+ ${formatCurrency(totalDespesas)}`;
             document.getElementById('dispTotalLiquido').innerText = formatCurrency(totalLiquido);
 
             // Computer comparison
@@ -703,10 +786,10 @@
                 date: dateInput,
                 cieloItems: [...listData.cielo],
                 redeItems: [...listData.rede],
+                dinheiroItems: [...listData.dinheiro],
+                gavetaItems: [...listData.gaveta],
+                pixItems: [...listData.pix],
                 despesasItems: [...listData.despesas],
-                dinheiro: getFieldValue('inputDinheiro'),
-                gaveta: getFieldValue('inputGaveta'),
-                pix: getFieldValue('inputPix'),
                 computador: getFieldValue('inputComputador')
             };
 
@@ -723,6 +806,7 @@
             }
 
             localStorage.setItem('caixa_history_v3', JSON.stringify(history));
+            localStorage.removeItem('caixa_draft_v1'); // Limpa o rascunho ao salvar o dia com sucesso
             showToast("Fechamento salvo!", "fa-floppy-disk", "text-emerald-400");
             renderHistory();
         }
@@ -744,12 +828,16 @@
             container.innerHTML = history.map(item => {
                 const totalCielo = (item.cieloItems || []).reduce((a, b) => a + (b.value || 0), 0);
                 const totalRede = (item.redeItems || []).reduce((a, b) => a + (b.value || 0), 0);
+                const totalDinheiro = (item.dinheiroItems || []).reduce((a, b) => a + (b.value || 0), 0);
+                const totalGaveta = (item.gavetaItems || []).reduce((a, b) => a + (b.value || 0), 0);
+                const totalPix = (item.pixItems || []).reduce((a, b) => a + (b.value || 0), 0);
                 const totalDespesas = (item.despesasItems || []).reduce((a, b) => a + (b.value || 0), 0);
 
                 const totalCartoes = totalCielo + totalRede;
-                const totalEspecie = (item.dinheiro || 0) + (item.gaveta || 0) + (item.pix || 0);
-                const totalBruto = totalCartoes + totalEspecie;
-                const totalLiquido = totalBruto - totalDespesas;
+                const totalEspecie = totalDinheiro + totalGaveta + totalPix;
+                
+                // Soma total incluindo Despesas
+                const totalLiquido = totalCartoes + totalEspecie + totalDespesas;
                 const diff = totalLiquido - (item.computador || 0);
 
                 let statusBadge = '';
@@ -780,10 +868,10 @@
 
                         <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                             <div class="text-slate-500">Cielo (${(item.cieloItems || []).length}): <span class="font-semibold text-indigo-700">${formatCurrency(totalCielo)}</span></div>
-                            <div class="text-slate-500">Rede (${(item.redeItems || []).length}): <span class="font-semibold text-rose-700">${formatCurrency(totalRede)}</span></div>
-                            <div class="text-slate-500">Dinheiro: <span class="font-semibold text-slate-700">${formatCurrency(item.dinheiro || 0)}</span></div>
-                            <div class="text-slate-500">Gaveta: <span class="font-semibold text-slate-700">${formatCurrency(item.gaveta || 0)}</span></div>
-                            <div class="text-slate-500">Pix: <span class="font-semibold text-slate-700">${formatCurrency(item.pix || 0)}</span></div>
+                            <div class="text-slate-500">Rede (${(item.redeItems || []).length}): <span class="font-semibold text-orange-700">${formatCurrency(totalRede)}</span></div>
+                            <div class="text-slate-500">Dinheiro (${(item.dinheiroItems || []).length}): <span class="font-semibold text-emerald-700">${formatCurrency(totalDinheiro)}</span></div>
+                            <div class="text-slate-500">Gaveta (${(item.gavetaItems || []).length}): <span class="font-semibold text-slate-700">${formatCurrency(totalGaveta)}</span></div>
+                            <div class="text-slate-500">Pix (${(item.pixItems || []).length}): <span class="font-semibold text-teal-700">${formatCurrency(totalPix)}</span></div>
                             <div class="text-slate-500">Despesas (${(item.despesasItems || []).length}): <span class="font-semibold text-rose-600">${formatCurrency(totalDespesas)}</span></div>
                         </div>
 
@@ -802,21 +890,19 @@
             if (!record) return;
 
             document.getElementById('entryDate').value = record.date;
-            
+
             listData.cielo = [...(record.cieloItems || [])];
             listData.rede = [...(record.redeItems || [])];
+            listData.dinheiro = [...(record.dinheiroItems || [])];
+            listData.gaveta = [...(record.gavetaItems || [])];
+            listData.pix = [...(record.pixItems || [])];
             listData.despesas = [...(record.despesasItems || [])];
 
-            updateCompactDisplays('cielo');
-            updateCompactDisplays('rede');
-            updateCompactDisplays('despesas');
-
-            setInputValue('inputDinheiro', record.dinheiro);
-            setInputValue('inputGaveta', record.gaveta);
-            setInputValue('inputPix', record.pix);
+            updateAllCompactDisplays();
             setInputValue('inputComputador', record.computador);
 
             calculateAll();
+            saveDraft();
             toggleView('calc');
             showToast(`Caixa de ${formatDateBr(record.date)} carregado!`, "fa-folder-open", "text-indigo-400");
         }
@@ -858,19 +944,17 @@
         // WhatsApp Share
         function shareWhatsApp() {
             const date = document.getElementById('entryDate').value;
-            const totalCielo = listData.cielo.reduce((a, b) => a + b.value, 0);
-            const totalRede = listData.rede.reduce((a, b) => a + b.value, 0);
-            const totalDespesas = listData.despesas.reduce((a, b) => a + b.value, 0);
+            const totalCielo = getListSum('cielo');
+            const totalRede = getListSum('rede');
+            const totalDinheiro = getListSum('dinheiro');
+            const totalGaveta = getListSum('gaveta');
+            const totalPix = getListSum('pix');
+            const totalDespesas = getListSum('despesas');
+
             const totalCartoes = totalCielo + totalRede;
-
-            const dinheiro = getFieldValue('inputDinheiro');
-            const gaveta = getFieldValue('inputGaveta');
-            const pix = getFieldValue('inputPix');
+            const totalEspecie = totalDinheiro + totalGaveta + totalPix;
+            const totalLiquido = totalCartoes + totalEspecie + totalDespesas;
             const computador = getFieldValue('inputComputador');
-
-            const totalEspecie = dinheiro + gaveta + pix;
-            const totalBruto = totalCartoes + totalEspecie;
-            const totalLiquido = totalBruto - totalDespesas;
             const diff = totalLiquido - computador;
 
             let resultadoTxt = "CAIXA BATEU EXATO!";
@@ -879,14 +963,14 @@
 
             let text = `*FECHAMENTO DE CAIXA* 📊\n`;
             text += `📅 *Data:* ${formatDateBr(date)}\n\n`;
-            
+
             text += `💳 *Cielo (${listData.cielo.length} notas):* ${formatCurrency(totalCielo)}\n`;
             text += `💳 *Rede (${listData.rede.length} notas):* ${formatCurrency(totalRede)}\n`;
-            text += `💵 *Dinheiro:* ${formatCurrency(dinheiro)}\n`;
-            text += `📥 *Gaveta:* ${formatCurrency(gaveta)}\n`;
-            text += `📱 *CPF / Pix:* ${formatCurrency(pix)}\n`;
+            text += `💵 *Dinheiro (${listData.dinheiro.length} itens):* ${formatCurrency(totalDinheiro)}\n`;
+            text += `📥 *Gaveta (${listData.gaveta.length} itens):* ${formatCurrency(totalGaveta)}\n`;
+            text += `📱 *CPF / Pix (${listData.pix.length} itens):* ${formatCurrency(totalPix)}\n`;
             if (totalDespesas > 0) {
-                text += `💸 *Despesas (${listData.despesas.length} itens):* -${formatCurrency(totalDespesas)}\n`;
+                text += `💸 *Despesas (${listData.despesas.length} itens):* ${formatCurrency(totalDespesas)}\n`;
             }
             text += `------------------------------\n`;
             text += `✅ *Total Cartões:* ${formatCurrency(totalCartoes)}\n`;
@@ -911,13 +995,12 @@
                 histView.classList.remove('hidden');
                 btnText.innerText = "Calculadora";
             } else {
-                histView.classList.add('hidden');
-                calcView.classList.remove('hidden');
+                histView.classList.remove('hidden');
+                calcView.classList.add('hidden');
                 btnText.innerText = "Histórico";
             }
         }
 
-        // Toast Helper
         function showToast(msg, icon = "fa-circle-check", iconColor = "text-emerald-400") {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toastMsg');
@@ -941,4 +1024,5 @@
       }
     </script>
 </body>
+</html>
 </html>
