@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Conferência de Caixa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Caixa Fácil">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .active-scale:active {
+            transform: scale(0.97);
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        /* Modal animation styling */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-modal {
+            animation: modalFadeIn 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12 flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-md mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                    <i class="fa-solid fa-calculator text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide">Conferência de Caixa</h1>
+                    <p class="text-xs text-indigo-100/80">Lançamentos Ilimitados & Caixa</p>
+                </div>
+            </div>
+            <button id="toggleHistoryBtn" onclick="toggleView()" class="bg-white/10 hover:bg-white/20 active-scale px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 backdrop-blur-sm transition">
+                <i class="fa-solid fa-history"></i>
+                <span id="tabBtnText">Histórico</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto px-4 pt-4 flex-1 w-full">
+
+        <!-- CALCULATOR VIEW -->
+        <div id="calculatorView" class="space-y-4">
+            
+            <!-- Date & Quick Actions -->
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-check text-indigo-600 text-lg"></i>
+                    <div>
+                        <label for="entryDate" class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Data do Caixa</label>
+                        <input type="date" id="entryDate" class="font-semibold text-slate-700 bg-transparent text-sm focus:outline-none">
+                    </div>
+                </div>
+                <button onclick="clearFormWithConfirm()" class="text-xs text-rose-600 font-semibold bg-rose-50 hover:bg-rose-100 active-scale px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Limpar
+                </button>
+            </div>
+
+            <!-- SECTION 1: CARTÕES (LANÇAMENTO MULTI-ITEM NOTA POR NOTA) -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-credit-card text-indigo-500"></i>
+                        Lançamento por Notas de Cartão
+                    </span>
+                    <span class="text-[10px] text-indigo-600 font-medium lowercase">digite + enter</span>
+                </h2>
+
+                <!-- CARTÃO CIELO MULTI-INPUT -->
+                <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-indigo-900 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                            Cartão Cielo
+                        </span>
+                        <span id="cieloCount" class="text-[11px] font-semibold text-slate-500">0 lançamentos</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">R$</span>
+                            <input type="text" id="inputCieloItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'cielo')" oninput="formatCurrencyInput(this)">
+                        </div>
+                        <button onclick="addListValue('cielo')" class="bg-indigo-600 hover:bg-indigo-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="hidden sm:inline">Adicionar</span>
+                        </button>
+                    </div>
+
+                    <!-- Compact Summary Header & Modal Trigger -->
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200/80">
+                        <div>
+                            <span class="text-[11px] text-slate-500 font-medium block">Subtotal Cielo:</span>
+                            <span id="cieloSubtotalDisp" class="text-indigo-700 font-extrabold text-sm">R$ 0,00</span>
+                        </div>
+                        <button onclick="openItemsModal('cielo')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-indigo-200/60">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Ver Notas (<span id="cieloBtnCount">0</span>)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARTÃO REDE MULTI-INPUT -->
+                <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-rose-900 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                            Cartão Rede
+                        </span>
+                        <span id="redeCount" class="text-[11px] font-semibold text-slate-500">0 lançamentos</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">R$</span>
+                            <input type="text" id="inputRedeItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'rede')" oninput="formatCurrencyInput(this)">
+                        </div>
+                        <button onclick="addListValue('rede')" class="bg-rose-600 hover:bg-rose-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="hidden sm:inline">Adicionar</span>
+                        </button>
+                    </div>
+
+                    <!-- Compact Summary Header & Modal Trigger -->
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200/80">
+                        <div>
+                            <span class="text-[11px] text-slate-500 font-medium block">Subtotal Rede:</span>
+                            <span id="redeSubtotalDisp" class="text-rose-700 font-extrabold text-sm">R$ 0,00</span>
+                        </div>
+                        <button onclick="openItemsModal('rede')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-rose-200/60">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Ver Notas (<span id="redeBtnCount">0</span>)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: DINHEIRO, PIX, GAVETA E DESPESAS (MULTI-ITEM) -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3.5">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-money-bill-wave text-emerald-500"></i>
+                    Espécie, Pix e Despesas
+                </h2>
+
+                <!-- Dinheiro -->
+                <div class="relative">
+                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Dinheiro em Espécie</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
+                        <input type="text" id="inputDinheiro" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-base focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
+                        <button onclick="clearSingleField('inputDinheiro')" class="absolute right-2.5 text-slate-300 hover:text-slate-500 p-1">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gaveta -->
+                <div class="relative">
+                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Gaveta (Fundo / Troco)</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
+                        <input type="text" id="inputGaveta" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-base focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
+                        <button onclick="clearSingleField('inputGaveta')" class="absolute right-2.5 text-slate-300 hover:text-slate-500 p-1">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CPF - Pix -->
+                <div class="relative">
+                    <label class="text-xs font-semibold text-slate-600 mb-1 block">CPF - Pix</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
+                        <input type="text" id="inputPix" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-base focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
+                        <button onclick="clearSingleField('inputPix')" class="absolute right-2.5 text-slate-300 hover:text-slate-500 p-1">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Despesas Multi-Lançamento -->
+                <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-200/80 space-y-2.5 pt-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-rose-900 flex items-center gap-1">
+                            <i class="fa-solid fa-receipt text-rose-500"></i>
+                            Despesas (Retiradas / Sangrias)
+                        </span>
+                        <span id="despesasCount" class="text-[11px] font-semibold text-rose-600">0 lançamentos</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-rose-400 text-xs font-semibold">R$</span>
+                            <input type="text" id="inputDespesasItem" inputmode="numeric" placeholder="0,00" class="w-full pl-9 pr-3 py-2 bg-white border border-rose-200 rounded-xl font-bold text-rose-800 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 focus:outline-none transition" onkeydown="handleCardKeydown(event, 'despesas')" oninput="formatCurrencyInput(this)">
+                        </div>
+                        <button onclick="addListValue('despesas')" class="bg-rose-600 hover:bg-rose-700 active-scale text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="hidden sm:inline">Adicionar</span>
+                        </button>
+                    </div>
+
+                    <!-- Compact Summary Header & Modal Trigger -->
+                    <div class="flex justify-between items-center pt-2 border-t border-rose-200/80">
+                        <div>
+                            <span class="text-[11px] text-rose-700 font-medium block">Total Despesas:</span>
+                            <span id="despesasSubtotalDisp" class="text-rose-800 font-extrabold text-sm">R$ 0,00</span>
+                        </div>
+                        <button onclick="openItemsModal('despesas')" class="bg-white hover:bg-rose-100 text-rose-800 active-scale px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition border border-rose-200">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Ver Itens (<span id="despesasBtnCount">0</span>)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPUTADOR / SISTEMA -->
+            <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-4 shadow-md space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-desktop"></i>
+                        Valor Registrado no Computador
+                    </label>
+                </div>
+                <div class="relative flex items-center">
+                    <span class="absolute left-3 text-slate-400 text-sm font-semibold">R$</span>
+                    <input type="text" id="inputComputador" inputmode="numeric" placeholder="0,00" class="currency-input w-full pl-9 pr-8 py-3 bg-white/10 border border-white/20 rounded-xl font-extrabold text-white text-lg placeholder-slate-400 focus:bg-white/20 focus:border-indigo-400 focus:outline-none transition" oninput="formatCurrencyInput(this); calculateAll();">
+                    <button onclick="clearSingleField('inputComputador')" class="absolute right-2.5 text-slate-400 hover:text-white p-1">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESUMO DE SUBTOTALS -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 mb-1">
+                    <i class="fa-solid fa-chart-pie text-indigo-500"></i>
+                    Resumo dos Totais
+                </h3>
+
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-indigo-50/50 p-2.5 rounded-xl border border-indigo-100">
+                        <p class="text-indigo-900/60 font-medium">Total Cielo</p>
+                        <p id="dispCieloTotal" class="font-bold text-indigo-700 text-sm mt-0.5">R$ 0,00</p>
+                    </div>
+                    <div class="bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
+                        <p class="text-rose-900/60 font-medium">Total Rede</p>
+                        <p id="dispRedeTotal" class="font-bold text-rose-700 text-sm mt-0.5">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 pt-1 text-sm">
+                    <div class="flex justify-between items-center py-1 border-b border-slate-50">
+                        <span class="text-slate-500 font-medium">Todos os Cartões (Cielo + Rede):</span>
+                        <span id="dispTotalCartoes" class="font-bold text-slate-800">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-slate-50">
+                        <span class="text-slate-500 font-medium">Total Espécie/Pix:</span>
+                        <span id="dispTotalEspecie" class="font-bold text-slate-800">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-slate-50">
+                        <span class="text-slate-500 font-medium text-rose-600">Total Despesas:</span>
+                        <span id="dispTotalDespesas" class="font-bold text-rose-600">- R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-slate-50">
+                        <span class="text-slate-500 font-medium">Total Geral Bruto:</span>
+                        <span id="dispTotalBruto" class="font-bold text-slate-800">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 text-base font-bold bg-indigo-50/70 px-3 rounded-xl text-indigo-950">
+                        <span>Total Líquido Final:</span>
+                        <span id="dispTotalLiquido" class="text-indigo-700">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULTADO COMPARATIVO DO CAIXA -->
+            <div id="resultCard" class="bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center transition-all duration-300">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Resultado do Fechamento</p>
+                <div id="resultBadge" class="text-lg font-black text-slate-600 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Preencha os valores</span>
+                </div>
+                <p id="resultDetail" class="text-xs text-slate-500 mt-1 font-medium">Informe o valor do computador para conferir</p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+                <button onclick="saveRecord()" class="w-full bg-indigo-600 hover:bg-indigo-700 active-scale text-white py-3 px-4 rounded-xl font-bold text-sm shadow-md shadow-indigo-200 flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Salvar Dia
+                </button>
+                <button onclick="shareWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 active-scale text-white py-3 px-4 rounded-xl font-bold text-sm shadow-md shadow-emerald-200 flex items-center justify-center gap-2 transition">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    WhatsApp
+                </button>
+            </div>
+
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div id="historyView" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-slate-800 text-base">Histórico de Fechamentos</h2>
+                    <p class="text-xs text-slate-400">Registros dos dias anteriores</p>
+                </div>
+                <button onclick="clearAllHistory()" class="text-xs text-rose-600 font-semibold bg-rose-50 hover:bg-rose-100 active-scale px-2.5 py-1.5 rounded-lg transition">
+                    Apagar Histórico
+                </button>
+            </div>
+
+            <div id="historyList" class="space-y-3">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DE LISTA DE NOTAS/LANÇAMENTOS (ILIMITADOS) -->
+    <div id="itemsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-modal">
+            <!-- Modal Header -->
+            <div id="modalHeaderBg" class="bg-indigo-600 text-white px-5 py-4 flex items-center justify-between shadow-md">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-white/20 p-2 rounded-xl">
+                        <i id="modalHeaderIcon" class="fa-solid fa-list-check text-white"></i>
+                    </div>
+                    <div>
+                        <h3 id="modalTitle" class="font-bold text-base leading-tight">Lista de Lançamentos</h3>
+                        <p id="modalSubtitle" class="text-xs text-white/80">0 itens lançados</p>
+                    </div>
+                </div>
+                <button onclick="closeItemsModal()" class="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full active-scale transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable List) -->
+            <div class="p-4 overflow-y-auto flex-1 space-y-2" id="modalItemsContainer">
+                <!-- Items list rendered dynamically -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 font-medium block">Soma dos Lançamentos</span>
+                    <span id="modalTotalSum" class="text-slate-900 font-extrabold text-lg">R$ 0,00</span>
+                </div>
+                <button onclick="closeItemsModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-2.5 rounded-xl text-xs active-scale transition">
+                    Concluído
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">Mensagem</span>
+    </div>
+
+    <script>
+        // Store for unlimited items
+        let listData = {
+            cielo: [],
+            rede: [],
+            despesas: []
+        };
+
+        let currentActiveModalType = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('entryDate').value = today;
+            calculateAll();
+            renderHistory();
+        });
+
+        // Parse String formatted R$ into Float
+        function parseCurrency(valueString) {
+            if (!valueString) return 0;
+            const digits = valueString.replace(/\D/g, '');
+            if (!digits) return 0;
+            return parseFloat(digits) / 100;
+        }
+
+        // Format Float into R$ String
+        function formatCurrency(number) {
+            return number.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+        }
+
+        // Format live typing in input field
+        function formatCurrencyInput(input) {
+            let digits = input.value.replace(/\D/g, '');
+            if (digits === '') {
+                input.value = '';
+            } else {
+                let numericValue = parseFloat(digits) / 100;
+                input.value = numericValue.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+        }
+
+        // Handle Enter key on inputs
+        function handleCardKeydown(event, type) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addListValue(type);
+            }
+        }
+
+        // Add item to Cielo, Rede or Despesas unlimited array
+        function addListValue(type) {
+            let inputId = 'inputCieloItem';
+            if (type === 'rede') inputId = 'inputRedeItem';
+            if (type === 'despesas') inputId = 'inputDespesasItem';
+
+            const input = document.getElementById(inputId);
+            const value = parseCurrency(input.value);
+
+            if (value <= 0) {
+                showToast("Digite um valor maior que zero.", "fa-circle-exclamation", "text-amber-400");
+                return;
+            }
+
+            listData[type].push({
+                id: Date.now() + Math.random(),
+                value: value,
+                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            input.value = ''; // Clear for next input
+            input.focus(); // Keep focus for quick consecutive entry
+
+            updateCompactDisplays(type);
+            calculateAll();
+
+            // If modal is currently open for this type, refresh its content
+            if (currentActiveModalType === type) {
+                renderModalItems();
+            }
+        }
+
+        // Remove single item by ID
+        function removeListItem(type, itemId) {
+            listData[type] = listData[type].filter(item => item.id !== itemId);
+            updateCompactDisplays(type);
+            calculateAll();
+            if (currentActiveModalType === type) {
+                renderModalItems();
+            }
+        }
+
+        // Update display counters and subtotals on main page
+        function updateCompactDisplays(type) {
+            const items = listData[type];
+            const sum = items.reduce((acc, item) => acc + item.value, 0);
+
+            const countText = `${items.length} ${items.length === 1 ? 'lançamento' : 'lançamentos'}`;
+            
+            if (type === 'cielo') {
+                document.getElementById('cieloCount').innerText = countText;
+                document.getElementById('cieloSubtotalDisp').innerText = formatCurrency(sum);
+                document.getElementById('cieloBtnCount').innerText = items.length;
+            } else if (type === 'rede') {
+                document.getElementById('redeCount').innerText = countText;
+                document.getElementById('redeSubtotalDisp').innerText = formatCurrency(sum);
+                document.getElementById('redeBtnCount').innerText = items.length;
+            } else if (type === 'despesas') {
+                document.getElementById('despesasCount').innerText = countText;
+                document.getElementById('despesasSubtotalDisp').innerText = formatCurrency(sum);
+                document.getElementById('despesasBtnCount').innerText = items.length;
+            }
+        }
+
+        // Open Modal Pop-up for viewing all items
+        function openItemsModal(type) {
+            currentActiveModalType = type;
+            const modal = document.getElementById('itemsModal');
+            const headerBg = document.getElementById('modalHeaderBg');
+            const title = document.getElementById('modalTitle');
+            const icon = document.getElementById('modalHeaderIcon');
+
+            if (type === 'cielo') {
+                headerBg.className = "bg-indigo-600 text-white px-5 py-4 flex items-center justify-between shadow-md";
+                title.innerText = "Lançamentos Cielo";
+                icon.className = "fa-solid fa-credit-card text-white";
+            } else if (type === 'rede') {
+                headerBg.className = "bg-rose-600 text-white px-5 py-4 flex items-center justify-between shadow-md";
+                title.innerText = "Lançamentos Rede";
+                icon.className = "fa-solid fa-credit-card text-white";
+            } else {
+                headerBg.className = "bg-rose-700 text-white px-5 py-4 flex items-center justify-between shadow-md";
+                title.innerText = "Lançamentos de Despesas";
+                icon.className = "fa-solid fa-receipt text-white";
+            }
+
+            renderModalItems();
+            modal.classList.remove('hidden');
+        }
+
+        function closeItemsModal() {
+            document.getElementById('itemsModal').classList.add('hidden');
+            currentActiveModalType = null;
+        }
+
+        function renderModalItems() {
+            if (!currentActiveModalType) return;
+            const type = currentActiveModalType;
+            const items = listData[type];
+            const container = document.getElementById('modalItemsContainer');
+            const subtitle = document.getElementById('modalSubtitle');
+            const totalSum = document.getElementById('modalTotalSum');
+
+            const sum = items.reduce((acc, item) => acc + item.value, 0);
+            subtitle.innerText = `${items.length} ${items.length === 1 ? 'item lançado' : 'itens lançados'}`;
+            totalSum.innerText = formatCurrency(sum);
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="py-12 text-center text-slate-400 space-y-2">
+                        <i class="fa-solid fa-inbox text-4xl"></i>
+                        <p class="text-xs font-semibold">Nenhum lançamento cadastrado nesta seção.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Reverse items so newest is on top
+            const reversedItems = [...items].reverse();
+
+            container.innerHTML = reversedItems.map((item, idx) => {
+                const originalIndex = items.length - idx;
+                return `
+                    <div class="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/70 transition">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-[11px] flex items-center justify-center">
+                                ${originalIndex}
+                            </span>
+                            <div>
+                                <span class="font-bold text-slate-800 text-base block leading-tight">
+                                    ${formatCurrency(item.value)}
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-medium">Lançado às ${item.time}</span>
+                            </div>
+                        </div>
+                        <button onclick="removeListItem('${type}', ${item.id})" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 p-2 rounded-lg text-xs font-semibold transition active-scale flex items-center gap-1">
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Excluir</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function clearSingleField(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                calculateAll();
+            }
+        }
+
+        function clearFormWithConfirm() {
+            if (confirm("Deseja mesmo limpar todos os lançamentos do dia?")) {
+                listData.cielo = [];
+                listData.rede = [];
+                listData.despesas = [];
+
+                updateCompactDisplays('cielo');
+                updateCompactDisplays('rede');
+                updateCompactDisplays('despesas');
+
+                document.querySelectorAll('.currency-input').forEach(i => i.value = '');
+                document.getElementById('inputCieloItem').value = '';
+                document.getElementById('inputRedeItem').value = '';
+                document.getElementById('inputDespesasItem').value = '';
+
+                calculateAll();
+                showToast("Formulário zerado!", "fa-circle-check", "text-emerald-400");
+            }
+        }
+
+        function getFieldValue(id) {
+            return parseCurrency(document.getElementById(id)?.value || '');
+        }
+
+        // Calculation Logic
+        function calculateAll() {
+            const totalCielo = listData.cielo.reduce((acc, item) => acc + item.value, 0);
+            const totalRede = listData.rede.reduce((acc, item) => acc + item.value, 0);
+            const totalCartoes = totalCielo + totalRede;
+
+            const dinheiro = getFieldValue('inputDinheiro');
+            const gaveta = getFieldValue('inputGaveta');
+            const pix = getFieldValue('inputPix');
+            
+            const totalDespesas = listData.despesas.reduce((acc, item) => acc + item.value, 0);
+            const computador = getFieldValue('inputComputador');
+
+            const totalEspecie = dinheiro + gaveta + pix;
+            const totalBruto = totalCartoes + totalEspecie;
+            const totalLiquido = totalBruto - totalDespesas;
+
+            // Updates Summary Display
+            document.getElementById('dispCieloTotal').innerText = formatCurrency(totalCielo);
+            document.getElementById('dispRedeTotal').innerText = formatCurrency(totalRede);
+            document.getElementById('dispTotalCartoes').innerText = formatCurrency(totalCartoes);
+            document.getElementById('dispTotalEspecie').innerText = formatCurrency(totalEspecie);
+            document.getElementById('dispTotalDespesas').innerText = `- ${formatCurrency(totalDespesas)}`;
+            document.getElementById('dispTotalBruto').innerText = formatCurrency(totalBruto);
+            document.getElementById('dispTotalLiquido').innerText = formatCurrency(totalLiquido);
+
+            // Computer comparison
+            const resultCard = document.getElementById('resultCard');
+            const resultBadge = document.getElementById('resultBadge');
+            const resultDetail = document.getElementById('resultDetail');
+            const hasComputerVal = document.getElementById('inputComputador').value.trim() !== '';
+
+            if (!hasComputerVal) {
+                resultCard.className = "bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center transition-all duration-300";
+                resultBadge.className = "text-lg font-black text-slate-600 flex items-center justify-center gap-2";
+                resultBadge.innerHTML = `<i class="fa-solid fa-calculator"></i><span>Aguardando Computador</span>`;
+                resultDetail.className = "text-xs text-slate-500 mt-1 font-medium";
+                resultDetail.innerText = "Informe o valor do sistema para calcular a diferença.";
+                return;
+            }
+
+            const diff = totalLiquido - computador;
+            const absDiff = Math.abs(diff);
+
+            if (Math.abs(diff) < 0.009) {
+                resultCard.className = "bg-emerald-500 text-white rounded-2xl p-4 text-center shadow-lg shadow-emerald-100 transition-all duration-300";
+                resultBadge.className = "text-xl font-black flex items-center justify-center gap-2";
+                resultBadge.innerHTML = `<i class="fa-solid fa-circle-check text-2xl"></i><span>Caixa Bateu Exato! 🎉</span>`;
+                resultDetail.className = "text-xs text-emerald-100 mt-1 font-semibold";
+                resultDetail.innerText = "Valores conferem perfeitamente.";
+            } else if (diff > 0) {
+                resultCard.className = "bg-indigo-600 text-white rounded-2xl p-4 text-center shadow-lg shadow-indigo-100 transition-all duration-300";
+                resultBadge.className = "text-xl font-black flex items-center justify-center gap-2";
+                resultBadge.innerHTML = `<i class="fa-solid fa-arrow-up-right-dots text-2xl"></i><span>Sobrando ${formatCurrency(absDiff)}</span>`;
+                resultDetail.className = "text-xs text-indigo-100 mt-1 font-semibold";
+                resultDetail.innerText = `Líquido (${formatCurrency(totalLiquido)}) é maior que no Computador (${formatCurrency(computador)}).`;
+            } else {
+                resultCard.className = "bg-rose-600 text-white rounded-2xl p-4 text-center shadow-lg shadow-rose-100 transition-all duration-300";
+                resultBadge.className = "text-xl font-black flex items-center justify-center gap-2";
+                resultBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-2xl"></i><span>Faltando ${formatCurrency(absDiff)}</span>`;
+                resultDetail.className = "text-xs text-rose-100 mt-1 font-semibold";
+                resultDetail.innerText = `Líquido (${formatCurrency(totalLiquido)}) é menor que no Computador (${formatCurrency(computador)}).`;
+            }
+        }
+
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem('caixa_history_v3') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveRecord() {
+            const dateInput = document.getElementById('entryDate').value;
+            if (!dateInput) {
+                showToast("Selecione uma data válida.", "fa-circle-exclamation", "text-amber-400");
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                date: dateInput,
+                cieloItems: [...listData.cielo],
+                redeItems: [...listData.rede],
+                despesasItems: [...listData.despesas],
+                dinheiro: getFieldValue('inputDinheiro'),
+                gaveta: getFieldValue('inputGaveta'),
+                pix: getFieldValue('inputPix'),
+                computador: getFieldValue('inputComputador')
+            };
+
+            const history = getHistory();
+            const existingIdx = history.findIndex(item => item.date === dateInput);
+            if (existingIdx !== -1) {
+                if (confirm(`Já existe um fechamento para ${formatDateBr(dateInput)}. Sobrescrever?`)) {
+                    history[existingIdx] = record;
+                } else {
+                    return;
+                }
+            } else {
+                history.unshift(record);
+            }
+
+            localStorage.setItem('caixa_history_v3', JSON.stringify(history));
+            showToast("Fechamento salvo!", "fa-floppy-disk", "text-emerald-400");
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = getHistory();
+            const container = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-100 text-slate-400 space-y-2">
+                        <i class="fa-solid fa-folder-open text-3xl"></i>
+                        <p class="text-sm font-medium">Nenhum histórico armazenado.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = history.map(item => {
+                const totalCielo = (item.cieloItems || []).reduce((a, b) => a + (b.value || 0), 0);
+                const totalRede = (item.redeItems || []).reduce((a, b) => a + (b.value || 0), 0);
+                const totalDespesas = (item.despesasItems || []).reduce((a, b) => a + (b.value || 0), 0);
+
+                const totalCartoes = totalCielo + totalRede;
+                const totalEspecie = (item.dinheiro || 0) + (item.gaveta || 0) + (item.pix || 0);
+                const totalBruto = totalCartoes + totalEspecie;
+                const totalLiquido = totalBruto - totalDespesas;
+                const diff = totalLiquido - (item.computador || 0);
+
+                let statusBadge = '';
+                if (Math.abs(diff) < 0.009) {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">OK</span>`;
+                } else if (diff > 0) {
+                    statusBadge = `<span class="bg-indigo-100 text-indigo-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">+ ${formatCurrency(diff)}</span>`;
+                } else {
+                    statusBadge = `<span class="bg-rose-100 text-rose-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">- ${formatCurrency(Math.abs(diff))}</span>`;
+                }
+
+                return `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 text-sm">${formatDateBr(item.date)}</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="loadRecord(${item.id})" title="Carregar no Caixa" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-upload"></i> Abrir
+                                </button>
+                                <button onclick="deleteRecord(${item.id})" title="Apagar" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg text-xs transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            <div class="text-slate-500">Cielo (${(item.cieloItems || []).length}): <span class="font-semibold text-indigo-700">${formatCurrency(totalCielo)}</span></div>
+                            <div class="text-slate-500">Rede (${(item.redeItems || []).length}): <span class="font-semibold text-rose-700">${formatCurrency(totalRede)}</span></div>
+                            <div class="text-slate-500">Dinheiro: <span class="font-semibold text-slate-700">${formatCurrency(item.dinheiro || 0)}</span></div>
+                            <div class="text-slate-500">Gaveta: <span class="font-semibold text-slate-700">${formatCurrency(item.gaveta || 0)}</span></div>
+                            <div class="text-slate-500">Pix: <span class="font-semibold text-slate-700">${formatCurrency(item.pix || 0)}</span></div>
+                            <div class="text-slate-500">Despesas (${(item.despesasItems || []).length}): <span class="font-semibold text-rose-600">${formatCurrency(totalDespesas)}</span></div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-50 flex justify-between items-center text-xs font-bold">
+                            <span class="text-slate-500">Líquido: <span class="text-indigo-600">${formatCurrency(totalLiquido)}</span></span>
+                            <span class="text-slate-500">Computador: <span class="text-slate-800">${formatCurrency(item.computador || 0)}</span></span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadRecord(id) {
+            const history = getHistory();
+            const record = history.find(r => r.id === id);
+            if (!record) return;
+
+            document.getElementById('entryDate').value = record.date;
+            
+            listData.cielo = [...(record.cieloItems || [])];
+            listData.rede = [...(record.redeItems || [])];
+            listData.despesas = [...(record.despesasItems || [])];
+
+            updateCompactDisplays('cielo');
+            updateCompactDisplays('rede');
+            updateCompactDisplays('despesas');
+
+            setInputValue('inputDinheiro', record.dinheiro);
+            setInputValue('inputGaveta', record.gaveta);
+            setInputValue('inputPix', record.pix);
+            setInputValue('inputComputador', record.computador);
+
+            calculateAll();
+            toggleView('calc');
+            showToast(`Caixa de ${formatDateBr(record.date)} carregado!`, "fa-folder-open", "text-indigo-400");
+        }
+
+        function setInputValue(id, numVal) {
+            const input = document.getElementById(id);
+            if (!input) return;
+            if (!numVal || numVal === 0) {
+                input.value = '';
+            } else {
+                input.value = numVal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+
+        function deleteRecord(id) {
+            if (confirm("Apagar este registro permanentemente?")) {
+                let history = getHistory();
+                history = history.filter(r => r.id !== id);
+                localStorage.setItem('caixa_history_v3', JSON.stringify(history));
+                renderHistory();
+                showToast("Registro removido.", "fa-trash", "text-rose-400");
+            }
+        }
+
+        function clearAllHistory() {
+            if (confirm("Deseja apagar TODO o histórico?")) {
+                localStorage.removeItem('caixa_history_v3');
+                renderHistory();
+                showToast("Histórico limpo.", "fa-trash", "text-rose-400");
+            }
+        }
+
+        function formatDateBr(dateString) {
+            if (!dateString) return '';
+            const parts = dateString.split('-');
+            return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateString;
+        }
+
+        // WhatsApp Share
+        function shareWhatsApp() {
+            const date = document.getElementById('entryDate').value;
+            const totalCielo = listData.cielo.reduce((a, b) => a + b.value, 0);
+            const totalRede = listData.rede.reduce((a, b) => a + b.value, 0);
+            const totalDespesas = listData.despesas.reduce((a, b) => a + b.value, 0);
+            const totalCartoes = totalCielo + totalRede;
+
+            const dinheiro = getFieldValue('inputDinheiro');
+            const gaveta = getFieldValue('inputGaveta');
+            const pix = getFieldValue('inputPix');
+            const computador = getFieldValue('inputComputador');
+
+            const totalEspecie = dinheiro + gaveta + pix;
+            const totalBruto = totalCartoes + totalEspecie;
+            const totalLiquido = totalBruto - totalDespesas;
+            const diff = totalLiquido - computador;
+
+            let resultadoTxt = "CAIXA BATEU EXATO!";
+            if (diff > 0) resultadoTxt = `SOBRANDO ${formatCurrency(diff)}`;
+            if (diff < 0) resultadoTxt = `FALTANDO ${formatCurrency(Math.abs(diff))}`;
+
+            let text = `*FECHAMENTO DE CAIXA* 📊\n`;
+            text += `📅 *Data:* ${formatDateBr(date)}\n\n`;
+            
+            text += `💳 *Cielo (${listData.cielo.length} notas):* ${formatCurrency(totalCielo)}\n`;
+            text += `💳 *Rede (${listData.rede.length} notas):* ${formatCurrency(totalRede)}\n`;
+            text += `💵 *Dinheiro:* ${formatCurrency(dinheiro)}\n`;
+            text += `📥 *Gaveta:* ${formatCurrency(gaveta)}\n`;
+            text += `📱 *CPF / Pix:* ${formatCurrency(pix)}\n`;
+            if (totalDespesas > 0) {
+                text += `💸 *Despesas (${listData.despesas.length} itens):* -${formatCurrency(totalDespesas)}\n`;
+            }
+            text += `------------------------------\n`;
+            text += `✅ *Total Cartões:* ${formatCurrency(totalCartoes)}\n`;
+            text += `✅ *Total Espécie/Pix:* ${formatCurrency(totalEspecie)}\n`;
+            text += `💰 *Total Líquido Final:* ${formatCurrency(totalLiquido)}\n`;
+            text += `💻 *Valor no Computador:* ${formatCurrency(computador)}\n`;
+            text += `------------------------------\n`;
+            text += `📌 *Resultado:* *${resultadoTxt}*`;
+
+            const encoded = encodeURIComponent(text);
+            window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+        }
+
+        // Navigation Toggle
+        function toggleView(target) {
+            const calcView = document.getElementById('calculatorView');
+            const histView = document.getElementById('historyView');
+            const btnText = document.getElementById('tabBtnText');
+
+            if (target === 'calc' || !calcView.classList.contains('hidden')) {
+                calcView.classList.add('hidden');
+                histView.classList.remove('hidden');
+                btnText.innerText = "Calculadora";
+            } else {
+                histView.classList.add('hidden');
+                calcView.classList.remove('hidden');
+                btnText.innerText = "Histórico";
+            }
+        }
+
+        // Toast Helper
+        function showToast(msg, icon = "fa-circle-check", iconColor = "text-emerald-400") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = msg;
+            toastIcon.className = `fa-solid ${icon} ${iconColor}`;
+
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
